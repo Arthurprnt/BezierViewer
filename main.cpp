@@ -5,8 +5,6 @@
 #include "opencv2/opencv.hpp"
 #include <string.h>
 
-#define N 400
-
 using namespace std;
 using namespace cv;
 
@@ -28,12 +26,12 @@ void supPoint(pnt* point) {
 }
 
 void manual() {
-    printf("Manual: ./BezierViewer [path the file]\n");
+    printf("Manual: ./BezierViewer [width of the window] [height of the window] [path the file]\n");
 }
 
-void initImage(Mat image, int r, int g, int b) {
-    for(int x=0; x<N; x++) {
-        for(int y=0; y<N; y++) {
+void initImage(Mat image, int w, int h, int r, int g, int b) {
+    for(int x=0; x<w; x++) {
+        for(int y=0; y<h; y++) {
             Vec3b pixel = image.at<Vec3b>(y, x);
             pixel[0] = b;
             pixel[1] = g;
@@ -105,15 +103,18 @@ pnt* calculBezier(pnt** lst, int taille, float t) {
 
 int main(int argc, char* argv[]) {
     string filePath;
-    if(argc >= 2) {
-        filePath = argv[1];
+    int w; int h;
+    if(argc >= 4) {
+        w = atoi(argv[1]);
+        h = atoi(argv[2]);
+        filePath = argv[3];
     } else {
         manual();
         return 0;
     }
 
-    Mat image(N, N, CV_8UC3, 0.0);
-    initImage(image, 100, 100, 100);
+    Mat image(h, w, CV_8UC3, 0.0);
+    initImage(image, w, h, 100, 100, 100);
 
     int nbPoints;
     FILE * file = fopen(filePath.data(), "r");
@@ -128,7 +129,7 @@ int main(int argc, char* argv[]) {
         listPoints[i] = tempp;
     }
     
-    int precision = N*N;
+    int precision = w*h;
     pnt** listCourbe = (pnt**)malloc((precision+1)*sizeof(pnt));
     for(int i=0; i<precision+1; i++) {
         float t = static_cast<float>(i)/precision;
@@ -140,7 +141,7 @@ int main(int argc, char* argv[]) {
     afficheListePoint(image, listCourbe, precision, 2, 255, 0, 0);
 
     while(true) {
-        imshow("Camera virtuelle", image);
+        imshow("BezierViewer", image);
         waitKey(1);
     }
 
